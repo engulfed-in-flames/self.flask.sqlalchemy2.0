@@ -1,0 +1,37 @@
+services:
+  db:
+    container_name: postgres
+    image: postgres
+    ports:
+      - 5432:${DB_PORT}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ="Asia/Tokyo"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # sudo chown -R 5050:5050 <host_directory>
+  pgadmin4:
+    container_name: pgadmin4
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres@postgres.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+    volumes:
+      - ./data/pgadmin:/var/lib/pgadmin
+
+volumes:
+  pgadmin-data:
